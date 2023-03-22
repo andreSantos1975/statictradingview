@@ -1,3 +1,327 @@
 DOCUMENTAÇÃO LIGHTWEIGHT-CHARTS
 
 https://github.com/tradingview/lightweight-charts/tree/b58f2c3e7f539db5baab660bc50842367f5ed4fb/docs
+
+-------------------------------------------------------------------------------------------
+---------------------------------------- 22-03-23 ----------------------------------------
+-------------------------------------------------------------------------------------------
+Para plotar o gráfico de velas usando o segundo código, você precisará fazer as seguintes 
+alterações na função Series:
+
+Remova a importação do addAreaSeries da biblioteca de gráficos usada no primeiro código, pois
+ não é necessário para plotar gráficos de velas.
+
+Crie uma instância do gráfico de velas usando o método addCandlestickSeries do objeto chart criado 
+no segundo código.
+
+Configure a instância do gráfico de velas para exibir as cores corretas para velas de alta e baixa 
+usando as propriedades upColor e downColor.
+
+Forneça os dados para a instância do gráfico de velas usando o método setData e os dados que 
+você deseja plotar.
+
+Segue abaixo o exemplo de como ficaria a função Series para plotar o gráfico de velas:
+
+typescript
+Copie o código
+export const Series = forwardRef((props, ref) => {
+  const parent = useContext(Context);
+  const context = useRef({
+    api() {
+      if (!this._api) {
+        const { children, data, type, ...rest } = props;
+        this._api = parent.api().addLineSeries(rest);
+        this._api.setData(data);
+      }
+      return this._api;
+    },
+    free() {
+      if (this._api) {
+        parent.free();
+      }
+    },
+  });
+
+  useLayoutEffect(() => {
+    const currentRef = context.current;
+    currentRef.api();
+
+    return () => currentRef.free();
+  }, []);
+
+  useLayoutEffect(() => {
+    const currentRef = context.current;
+    const { children, data, ...rest } = props;
+    currentRef.api().applyOptions(rest);
+  });
+
+  useImperativeHandle(ref, () => context.current.api(), []);
+
+  return (
+    <Context.Provider value={context.current}>
+      {props.children}
+    </Context.Provider>
+    -----------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------
+    Para plotar o gráfico de velas (candlestick) usando a biblioteca LightweightCharts, 
+    você pode modificar a função Series para que ela adicione um gráfico de velas em vez de 
+    um gráfico de linha ou área. Aqui está um exemplo de como você pode modificar a função Series:
+
+typescript
+Copi o código
+import { createContext, forwardRef, useContext, useImperativeHandle, useLayoutEffect, useRef } from 'react';
+import { createChart, CrosshairMode } from 'lightweight-charts';
+
+const Context = createContext(null);
+
+export const Series = forwardRef((props, ref) => {
+  const parent = useContext(Context);
+  const context = useRef({
+    api() {
+      if (!this._api) {
+        const { children, data, type, ...rest } = props;
+        this._api = parent.api().addCandlestickSeries(rest);
+        this._api.setData(data);
+      }
+      return this._api;
+    },
+    free() {
+      if (this._api) {
+        parent.free();
+      }
+    },
+  });
+
+  useLayoutEffect(() => {
+    const currentRef = context.current;
+    currentRef.api();
+
+    return () => currentRef.free();
+  }, []);
+
+  useLayoutEffect(() => {
+    const currentRef = context.current;
+    const { children, data, ...rest } = props;
+    currentRef.api().applyOptions(rest);
+  });
+
+  useImperativeHandle(ref, () => context.current.api(), []);
+
+  return (
+    <Context.Provider value={context.current}>
+      {props.children}
+    </Context.Provider>
+  );
+});
+
+Note que esta versão da função Series usa a biblioteca LightweightCharts para adicionar um 
+gráfico de velas (candlestick) em vez de um gráfico de linha ou área. Para usá-la, você precisa 
+importar a biblioteca LightweightCharts e criar um gráfico de velas (candlestick) e adicionar 
+dados usando o método setData. Aqui está um exemplo:
+
+php
+Copy code
+import { useRef, useEffect } from 'react';
+import { createChart, CrosshairMode } from 'lightweight-charts';
+import { Series } from './Series';
+
+function App() {
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    const chart = createChart(document.body, {
+      width: 600,
+      height: 300,
+      layout: {
+        background: {
+          type: 'solid',
+          color: '#000000',
+        },
+        textColor: 'rgba(255, 255, 255, 0.9)',
+      },
+      grid: {
+        vertLines: {
+          color: 'rgba(197, 203, 206, 0.5)',
+        },
+        horzLines: {
+          color: 'rgba(197, 203, 206, 0.5)',
+        },
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(197, 203, 206, 0.8)',
+      },
+      timeScale: {
+        borderColor: 'rgba(197, 203, 206, 0.8)',
+      },
+    });
+
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: 'rgba(255, 144, 0, 1)',
+      downColor: '#000',
+      borderDownColor: 'rgba(255, 144, 0, 1)',
+      borderUpColor: 'rgba(255, 144, 0, 1)',
+      wickDownColor: 'rgba(255, 144, 0, 1)',
+      wickUpColor: 'rgba(255,
+
+      -------------------------------------------------------------------------------------
+      -------------------------------------------------------------------------------------
+      Para adicionar um gráfico de velas ao código e adicionar dados usando o método setData,
+       você precisará:
+
+Adicione o seguinte import ao início do arquivo:
+python
+Copy code
+import { createChart, CrosshairMode, CandlestickSeries } from 'lightweight-charts';
+Adicione a seguinte linha dentro da função ChartContainer, logo abaixo da linha const 
+chartApiRef = useRef({ ... });:
+javascript
+Copy code
+const candleSeries = useRef(null);
+Adicione a seguinte linha dentro da função ChartContainer, logo abaixo
+ da linha const chart = currentRef.api();:
+scss
+Copy code
+if (!candleSeries.current) {
+  candleSeries.current = chart.addCandlestickSeries();
+  candleSeries.current.setData(initialData);
+}
+Substitua o componente Series existente pelo seguinte:
+php
+Copy code
+<CandlestickSeries
+  ref={candleSeries}
+  data={initialData}
+  upColor='#00ff00'
+  downColor='#ff0000'
+/>
+Isso adicionará um gráfico de velas ao seu aplicativo e usará o método setData para adicionar
+ os dados iniciais. Certifique-se de que o import seja colocado no início do arquivo e as 
+ outras alterações sejam feitas dentro da função ChartContainer.
+ --------------------------------------------------------------------------
+ -------------------------------------------------------------------------------------
+ Olá! Para adicionar a funcionalidade de gráfico de velas (candlestick chart) ao código React 
+ atual, você pode seguir os seguintes passos:
+
+Importe a biblioteca Lightweight Charts e a classe CandlestickSeries para o arquivo onde o 
+componente de gráfico é definido. Certifique-se de adicionar CandlestickSeries à lista de importações.
+python
+Copy code
+import { createChart, CandlestickSeries } from 'lightweight-charts';
+Crie uma referência para o CandlestickSeries que você acabou de importar. Adicione esta linha 
+ao corpo da função ChartContainer:
+javascript
+Copy code
+const candleSeries = useRef(null);
+No mesmo corpo de ChartContainer, adicione uma verificação condicional para verificar se
+ candleSeries.current está definido. Em seguida, adicione a chamada para o método setData 
+ com os dados de velas que deseja plotar. Substitua os dados existentes no corpo do candlestick por:
+scss
+Copy code
+if (!candleSeries.current) {
+  candleSeries.current = chart.addCandlestickSeries();
+  candleSeries.current.setData(initialData);
+}
+Por fim, atualize a chamada para CandlestickSeries no corpo da função App para usar a nova
+ referência candleSeries em vez da anterior:
+php
+Copy code
+<CandlestickSeries
+  ref={candleSeries}
+  upColor='#00ff00'
+  downColor='#ff0000'
+/>
+-------------------------------------------------------------------------
+-------------------------------------------- 10:07 -------------------------
+---------------------------------------------------------------------------
+import React, {
+	createContext,
+	forwardRef,
+	useCallback,
+	useContext,
+	useEffect,
+	useImperativeHandle,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from 'react';
+import { createChart } from 'lightweight-charts';
+import { CandlestickSeries } from 'lightweight-charts';
+
+const Context = createContext();
+
+const initialData = [
+	{ time: '2018-10-11', open: 52.89, high: 54.42, low: 50.93, close: 51.65 },
+	{ time: '2018-10-12', open: 51.65, high: 52.67, low: 47.26, close: 51.56 },
+	{ time: '2018-10-13', open: 51.56, high: 53.44, low: 50.7, close: 50.19 },
+	{ time: '2018-10-14', open: 50.19, high: 51.41, low: 49.19, close: 51.86 },
+	{ time: '2018-10-15', open: 51.86, high: 52.59, low: 50.35, close: 51.25 },
+];
+
+const currentDate = new Date(initialData[initialData.length - 1].time);
+
+export const App = props => {
+	const {
+		colors: {
+			backgroundColor = 'white',
+			lineColor = '#2962FF',
+			textColor = 'black',
+		} = {},
+	} = props;
+
+	const [chartLayoutOptions, setChartLayoutOptions] = useState({});
+	const [started, setStarted] = useState(false);
+	const chartContainerRef = useRef(null);
+	const chartInstanceRef = useRef(null);
+	const candleSeries = useRef(null);
+
+	useEffect(() => {
+		if (chartContainerRef.current === null) {
+			return;
+		}
+    -----------------------------------------------------------------
+    -----------------------------------------------------------------
+    O erro acontece na linha 30, quando o método setData é chamado no candleSeries.current.
+     Isso acontece porque o candleSeries está sendo referenciado antes de ser adicionado à 
+     instância do gráfico chart.
+
+Para corrigir esse erro, primeiro você precisa remover a seguinte linha de código da função 
+ChartContainer:
+
+jsx
+Copy code
+return <CandlestickSeries ref={candleSeries} data={data} upColor='#00ff00' downColor='#ff0000' />;
+Em seguida, mova a lógica para a seguinte condição, que verifica se o candleSeries não está definido:
+
+jsx
+Copy code
+if (!candleSeries.current) {
+    candleSeries.current = chart.addCandlestickSeries();
+    candleSeries.current.setData(data);
+}
+Isso garantirá que o candleSeries seja adicionado à instância do gráfico antes que setData seja chamado. O código corrigido da função ChartContainer seria assim:
+
+jsx
+Copy code
+export const ChartContainer = forwardRef((props, ref) => {
+    const { children, container, layout, ...rest } = props;
+    const candleSeries = useRef(null);
+    
+    const chartApiRef = useRef({
+        _api: null,
+        api() {
+            if (!this._api) {
+                this._api = createChart(container, {
+                    ...rest,
+                    layout,
+                    width: container.clientWidth,
+                    height: 300,
+                });
+                this._api.timeScale().fitContent();
+            }
+            return this._api;
+        },
+        free() {
+            if (

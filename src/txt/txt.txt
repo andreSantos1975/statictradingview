@@ -1,0 +1,3 @@
+DOCUMENTAÇÃO LIGHTWEIGHT-CHARTS
+
+https://github.com/tradingview/lightweight-charts/tree/b58f2c3e7f539db5baab660bc50842367f5ed4fb/docs

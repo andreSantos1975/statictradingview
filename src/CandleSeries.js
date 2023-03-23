@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { createChart, CandlestickSeries as CandlestickSeriesClass } from 'lightweight-charts';
+import { createChart } from 'lightweight-charts';
 
 export const CandlestickSeries = props => {
   const chartRef = useRef(null);
